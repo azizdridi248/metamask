@@ -1,5 +1,6 @@
 import React from 'react';
 import { Loader } from './Loader.jsx';
+import { TND_PER_ETH } from '../hooks/useTransaction.js';
 
 export function BalanceSection({ balance, isLoading, error, onRefetch, lastUpdated }) {
     const formatTime = (date) => {
@@ -13,7 +14,7 @@ export function BalanceSection({ balance, isLoading, error, onRefetch, lastUpdat
                 <div className="card-icon">💎</div>
                 <div>
                     <h2 className="card-title">Wallet Balance</h2>
-                    <p className="card-subtitle">Sepolia ETH balance (auto-refreshes every 15s)</p>
+                    <p className="card-subtitle">Balance in Tunisian Dinar (auto-refreshes every 15s)</p>
                 </div>
             </div>
 
@@ -28,9 +29,18 @@ export function BalanceSection({ balance, isLoading, error, onRefetch, lastUpdat
                 ) : (
                     <>
                         <div className="balance-amount">
-                            <span className="balance-value">{balance ?? '—'}</span>
-                            <span className="balance-unit">ETH</span>
+                            <span className="balance-value">
+                                {balance != null
+                                    ? (parseFloat(balance) * TND_PER_ETH).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                                    : '—'}
+                            </span>
+                            <span className="balance-unit">TND</span>
                         </div>
+                        {balance != null && (
+                            <div className="balance-tnd">
+                                ≈ {balance} ETH
+                            </div>
+                        )}
                         {lastUpdated && (
                             <span className="balance-updated">Last updated: {formatTime(lastUpdated)}</span>
                         )}

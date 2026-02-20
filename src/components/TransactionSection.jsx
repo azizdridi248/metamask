@@ -1,7 +1,7 @@
 import React from 'react';
 import { Loader } from './Loader.jsx';
 import { ErrorBanner } from './ErrorBanner.jsx';
-import { TX_STATUS } from '../hooks/useTransaction.js';
+import { TX_STATUS, tndToEth, TND_PER_ETH } from '../hooks/useTransaction.js';
 
 const ETHERSCAN_BASE = 'https://sepolia.etherscan.io/tx/';
 
@@ -42,7 +42,7 @@ export function TransactionSection({
                 <div className="card-icon">⚡</div>
                 <div>
                     <h2 className="card-title">Send Transaction</h2>
-                    <p className="card-subtitle">Transfer Sepolia ETH to another address</p>
+                    <p className="card-subtitle">Enter amount in Tunisian Dinar (TND) — converts to Sepolia ETH</p>
                 </div>
             </div>
 
@@ -67,22 +67,28 @@ export function TransactionSection({
 
             <div className="form-group">
                 <label className="form-label" htmlFor="amount-input">
-                    Amount (ETH)
+                    Amount (TND)
                 </label>
                 <div className="input-with-suffix">
                     <input
                         id="amount-input"
                         className="form-input"
                         type="number"
-                        placeholder="0.001"
-                        step="0.001"
+                        placeholder="10"
+                        step="1"
                         min="0"
                         value={amount}
                         onChange={(e) => setAmount(e.target.value)}
                         disabled={isPending}
                     />
-                    <span className="input-suffix">ETH</span>
+                    <span className="input-suffix">TND</span>
                 </div>
+                {amount && parseFloat(amount) > 0 && (
+                    <p className="form-hint">
+                        ≈ {tndToEth(parseFloat(amount)).toFixed(6)} ETH
+                        <span style={{ opacity: 0.6, marginLeft: '8px' }}>(1 ETH = {TND_PER_ETH.toLocaleString()} TND)</span>
+                    </p>
+                )}
             </div>
 
             <div className="btn-row">

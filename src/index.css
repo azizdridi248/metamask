@@ -608,6 +608,12 @@ code {
   letter-spacing: 0.06em;
 }
 
+.form-hint {
+  margin-top: 6px;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
 .form-input {
   width: 100%;
   padding: 12px 16px;
@@ -695,6 +701,13 @@ code {
   color: var(--accent-light);
   text-transform: uppercase;
   letter-spacing: 0.1em;
+}
+
+.balance-tnd {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-top: 2px;
 }
 
 .balance-updated {

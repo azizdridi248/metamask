@@ -8,6 +8,13 @@ export const TX_STATUS = {
     FAILED: 'failed',
 };
 
+// Exchange rate: 1 ETH = 1,000,000 TND
+export const TND_PER_ETH = 1000000;
+
+export function tndToEth(tnd) {
+    return tnd / TND_PER_ETH;
+}
+
 export function useTransaction(signer) {
     const [recipient, setRecipient] = useState('');
     const [amount, setAmount] = useState('');
@@ -28,11 +35,12 @@ export function useTransaction(signer) {
             setError('Invalid recipient address.');
             return;
         }
-        const amountNum = parseFloat(amount);
-        if (!amount || isNaN(amountNum) || amountNum <= 0) {
-            setError('Please enter a valid ETH amount greater than 0.');
+        const amountTnd = parseFloat(amount);
+        if (!amount || isNaN(amountTnd) || amountTnd <= 0) {
+            setError('Please enter a valid TND amount greater than 0.');
             return;
         }
+        const amountEth = tndToEth(amountTnd);
 
         setError('');
         setTxHash('');
@@ -41,10 +49,12 @@ export function useTransaction(signer) {
 
         // Create a new history entry immediately
         const entryId = Date.now();
+        const ethString = amountEth.toFixed(18);
         const newEntry = {
             id: entryId,
             recipient,
-            amount,
+            amountTnd: amount,
+            amount: ethString,
             hash: '',
             status: TX_STATUS.PENDING,
             blockNumber: null,
@@ -61,7 +71,7 @@ export function useTransaction(signer) {
         try {
             const tx = await signer.sendTransaction({
                 to: recipient,
-                value: parseEther(amount),
+                value: parseEther(ethString),
             });
             setTxHash(tx.hash);
             updateEntry({ hash: tx.hash });

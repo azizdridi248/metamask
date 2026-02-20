@@ -126,7 +126,14 @@ export function TransactionsPage({
                                         </div>
                                         <div className="tx-detail-row">
                                             <span className="tx-detail-label">Amount</span>
-                                            <span className="tx-detail-value tx-amount">{tx.amount} ETH</span>
+                                            <span className="tx-detail-value tx-amount">
+                                                {tx.amountTnd ? `${tx.amountTnd} TND` : tx.amount + ' ETH'}
+                                                {tx.amountTnd && (
+                                                    <span style={{ opacity: 0.6, marginLeft: '6px', fontSize: '0.85em' }}>
+                                                        (≈ {parseFloat(tx.amount).toFixed(6)} ETH)
+                                                    </span>
+                                                )}
+                                            </span>
                                         </div>
                                         {tx.hash && (
                                             <div className="tx-detail-row">
