@@ -16,6 +16,9 @@ export function useTransaction(signer) {
     const [error, setError] = useState('');
     const [blockNumber, setBlockNumber] = useState(null);
 
+    // History of all sent transactions
+    const [history, setHistory] = useState([]);
+
     const sendTransaction = useCallback(async () => {
         if (!signer) {
             setError('Wallet not connected.');
@@ -36,31 +39,54 @@ export function useTransaction(signer) {
         setBlockNumber(null);
         setStatus(TX_STATUS.PENDING);
 
+        // Create a new history entry immediately
+        const entryId = Date.now();
+        const newEntry = {
+            id: entryId,
+            recipient,
+            amount,
+            hash: '',
+            status: TX_STATUS.PENDING,
+            blockNumber: null,
+            timestamp: new Date().toISOString(),
+            error: '',
+        };
+        setHistory((prev) => [newEntry, ...prev]);
+
+        const updateEntry = (patch) =>
+            setHistory((prev) =>
+                prev.map((e) => (e.id === entryId ? { ...e, ...patch } : e))
+            );
+
         try {
             const tx = await signer.sendTransaction({
                 to: recipient,
                 value: parseEther(amount),
             });
             setTxHash(tx.hash);
+            updateEntry({ hash: tx.hash });
 
             // Wait for 1 confirmation
             const receipt = await tx.wait(1);
             if (receipt && receipt.status === 1) {
                 setStatus(TX_STATUS.CONFIRMED);
                 setBlockNumber(receipt.blockNumber);
+                updateEntry({ status: TX_STATUS.CONFIRMED, blockNumber: receipt.blockNumber });
             } else {
                 setStatus(TX_STATUS.FAILED);
                 setError('Transaction reverted on-chain.');
+                updateEntry({ status: TX_STATUS.FAILED, error: 'Transaction reverted on-chain.' });
             }
         } catch (err) {
             setStatus(TX_STATUS.FAILED);
+            let msg = err.message || 'Transaction failed.';
             if (err.code === 4001 || err.code === 'ACTION_REJECTED') {
-                setError('Transaction rejected. Please approve the transaction in MetaMask.');
+                msg = 'Transaction rejected. Please approve the transaction in MetaMask.';
             } else if (err.message?.includes('insufficient funds')) {
-                setError('Insufficient funds for this transaction (including gas fees).');
-            } else {
-                setError(err.message || 'Transaction failed.');
+                msg = 'Insufficient funds for this transaction (including gas fees).';
             }
+            setError(msg);
+            updateEntry({ status: TX_STATUS.FAILED, error: msg });
         }
     }, [signer, recipient, amount]);
 
@@ -73,6 +99,8 @@ export function useTransaction(signer) {
         setBlockNumber(null);
     }, []);
 
+    const clearHistory = useCallback(() => setHistory([]), []);
+
     return {
         recipient,
         setRecipient,
@@ -84,5 +112,7 @@ export function useTransaction(signer) {
         blockNumber,
         sendTransaction,
         reset,
+        history,
+        clearHistory,
     };
 }

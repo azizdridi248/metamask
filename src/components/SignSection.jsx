@@ -2,7 +2,7 @@ import React from 'react';
 import { Loader } from './Loader.jsx';
 import { ErrorBanner } from './ErrorBanner.jsx';
 
-export function SignSection({ message, signature, isSigning, error, verified, onSign, onClear }) {
+export function SignSection({ message, signature, isSigning, error, verified, onSign, onClear, onViewTransactions }) {
     const truncateSig = (sig) => {
         if (!sig) return '';
         return `${sig.slice(0, 20)}...${sig.slice(-16)}`;
@@ -66,7 +66,17 @@ export function SignSection({ message, signature, isSigning, error, verified, on
                         </details>
                     </div>
                     {verified && (
-                        <p className="verify-note">✅ Signature verified — this address controls the wallet.</p>
+                        <div className="auth-success">
+                            <p className="verify-note">✅ Signature verified — this address controls the wallet.</p>
+                            <button
+                                className="btn btn-accent"
+                                onClick={onViewTransactions}
+                                id="view-transactions-btn-sign"
+                            >
+                                <span className="btn-icon">📋</span>
+                                View Transactions →
+                            </button>
+                        </div>
                     )}
                 </div>
             )}
